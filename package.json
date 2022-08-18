@@ -10,9 +10,14 @@
     "@types/node": "^16.11.49",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
+    "@types/react-notifications-component": "^3.1.1",
+    "axios": "^0.27.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-notifications": "^1.7.4",
+    "react-notifications-component": "^4.0.1",
     "react-scripts": "5.0.1",
+    "remove": "^0.1.5",
     "typescript": "^4.7.4",
     "web-vitals": "^2.1.4"
   },
@@ -39,5 +44,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.1.8"
   }
 }
