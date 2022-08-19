@@ -15,7 +15,7 @@ const CardComponent = (props: ColorModel) => {
     return (
         <>
             <div
-                className="block p-6 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
+                className="flex flex-col justify-center p-6 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
                 style={{
                     background:props.hex,
                     color: textColor
@@ -71,7 +71,7 @@ function App() {
         <div className="App">
             <ReactNotifications/>
             <div className={'container mx-auto p-4 mt-4'}>
-                <form className="flex items-center max-w-md mx-auto">
+                <form className="flex gap-2 items-center max-w-md mx-auto">
                     <label htmlFor="simple-search" className="sr-only">Search</label>
                     <div className="relative w-full">
                         <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
@@ -86,6 +86,20 @@ function App() {
                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                placeholder="Search" onChange={onChangeSearch} required/>
                     </div>
+                    <button
+                        data-tooltip-target="tooltip-light"
+                        data-tooltip-style="light"
+                        type="button"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className={'w-5 h-5'} fill="currentColor"
+                             viewBox="0 0 16 16">
+                            <path fillRule="evenodd"
+                                  d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                            <path
+                                d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+                        </svg>
+                    </button>
                 </form>
 
                 <div className={'flex flex-wrap justify-center gap-4 mt-2 p-2'}>
@@ -103,6 +117,12 @@ function App() {
                         })
                     }
                 </div>
+            </div>
+
+            <div id="tooltip-light" role="tooltip"
+                 className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 shadow-sm opacity-0 tooltip">
+                Tooltip content
+                <div className="tooltip-arrow" data-popper-arrow/>
             </div>
         </div>
     );
