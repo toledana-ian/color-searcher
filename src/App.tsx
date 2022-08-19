@@ -15,54 +15,33 @@ const CardComponent = (props: ColorModel) => {
     return (
         <>
             <div
-                className="block p-6 max-w-sm rounded-lg border border-black shadow-md"
+                className="block p-6 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
                 style={{
                     background:props.hex,
                     color: textColor
                 }}
+                onClick={()=>{
+                    navigator.clipboard.writeText(props.name+'\t'+ props.hex);
+                    Store.removeAllNotifications();
+                    Store.addNotification({
+                        title: "Success!",
+                        message: 'Copied '+props.name+' to clipboard',
+                        type: "success",
+                        insert: "top",
+                        container: "top-right",
+                        animationIn: ["animate__animated", "animate__fadeIn"],
+                        animationOut: ["animate__animated", "animate__fadeOut"],
+                        dismiss: {
+                            duration: 5000,
+                            onScreen: true
+                        }
+                    });
+                }}
             >
-                <div
-                    className={'font-bold text-center cursor-pointer'}
-                    onClick={()=>{
-                        navigator.clipboard.writeText(props.name);
-                        Store.removeAllNotifications();
-                        Store.addNotification({
-                            title: "Success!",
-                            message: 'Copied '+props.name+' to clipboard',
-                            type: "success",
-                            insert: "top",
-                            container: "top-right",
-                            animationIn: ["animate__animated", "animate__fadeIn"],
-                            animationOut: ["animate__animated", "animate__fadeOut"],
-                            dismiss: {
-                                duration: 5000,
-                                onScreen: true
-                            }
-                        });
-                    }}
-                >
+                <div className={'font-bold text-center cursor-pointer'}>
                     {props.name}
                 </div>
-                <div
-                    className={'font-bold text-center cursor-pointer'}
-                    onClick={()=>{
-                        navigator.clipboard.writeText(props.hex);
-                        Store.removeAllNotifications();
-                        Store.addNotification({
-                            title: "Success!",
-                            message: 'Copied '+props.hex+' to clipboard',
-                            type: "success",
-                            insert: "top",
-                            container: "top-right",
-                            animationIn: ["animate__animated", "animate__fadeIn"],
-                            animationOut: ["animate__animated", "animate__fadeOut"],
-                            dismiss: {
-                                duration: 5000,
-                                onScreen: true
-                            }
-                        });
-                    }}
-                >
+                <div className={'font-bold text-center cursor-pointer'}>
                     {props.hex}
                 </div>
             </div>
