@@ -36,7 +36,8 @@ const CardComponent = (props: ColorModel) => {
                         animationOut: ["animate__animated", "animate__fadeOut"],
                         dismiss: {
                             duration: 5000,
-                            onScreen: true
+                            onScreen: true,
+                            showIcon:true
                         }
                     });
                 }}
@@ -57,6 +58,7 @@ function App() {
 
     const onChangeSearch = (event: React.FormEvent<HTMLInputElement>) => {
         const searchValue = event.currentTarget.value;
+        if(searchValue.length<3) return;
 
         axios
             .get('https://api.color.pizza/v1/names/'+searchValue)
@@ -135,15 +137,15 @@ function App() {
 
                 <div className={'flex flex-wrap justify-center gap-4 mt-2 p-2'}>
                     {
-                        colors.map((color) => {
+                        colors.map((color, index) => {
                             return (
-                                <>
+                                <React.Fragment key={'colort_'+index}>
                                     <CardComponent
                                         name={color.name}
                                         hex={color.hex}
                                         luminance={color.luminance}
                                     />
-                                </>
+                                </React.Fragment>
                             );
                         })
                     }
