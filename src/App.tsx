@@ -3,33 +3,33 @@ import axios from "axios";
 import 'react-notifications-component/dist/theme.css';
 import {ReactNotifications, Store} from 'react-notifications-component';
 import 'flowbite-react';
-import { Tooltip } from 'flowbite-react';
+import {Tooltip} from 'flowbite-react';
 import {HuePicker} from 'react-color';
 
 
-interface ColorModel{
+interface ColorModel {
     name: string,
     hex: string,
     luminance: number
 }
 
 const CardComponent = (props: ColorModel) => {
-    const textColor = props.luminance<65?'white':'black';
+    const textColor = props.luminance < 65 ? 'white' : 'black';
 
     return (
         <>
             <div
                 className="flex flex-col justify-center p-6 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
                 style={{
-                    background:props.hex,
+                    background: props.hex,
                     color: textColor
                 }}
-                onClick={()=>{
-                    navigator.clipboard.writeText(props.name+'\t'+ props.hex);
+                onClick={() => {
+                    navigator.clipboard.writeText(props.name + '\t' + props.hex);
                     Store.removeAllNotifications();
                     Store.addNotification({
                         title: "Success!",
-                        message: 'Copied '+props.name+' to clipboard',
+                        message: 'Copied ' + props.name + ' to clipboard',
                         type: "success",
                         insert: "top",
                         container: "top-right",
@@ -38,7 +38,7 @@ const CardComponent = (props: ColorModel) => {
                         dismiss: {
                             duration: 5000,
                             onScreen: true,
-                            showIcon:true
+                            showIcon: true
                         }
                     });
                 }}
@@ -56,14 +56,15 @@ const CardComponent = (props: ColorModel) => {
 
 function App() {
     const [colors, setColors] = useState<ColorModel[]>([]);
+    const [colorHuePicker, setColorHuePicker] = useState('#fff');
 
     const onChangeSearch = (event: React.FormEvent<HTMLInputElement>) => {
         const searchValue = event.currentTarget.value;
-        if(searchValue.length<3) return;
+        if (searchValue.length < 3) return;
 
         axios
-            .get('https://api.color.pizza/v1/names/'+searchValue)
-            .then((response)=>{
+            .get('https://api.color.pizza/v1/names/' + searchValue)
+            .then((response) => {
                 setColors(
                     response.data.colors
                 );
@@ -72,9 +73,9 @@ function App() {
     }
 
     const onClickShuffle = (_: React.FormEvent<HTMLButtonElement>) => {
-        const shuffle = (array:any[])=>{
+        const shuffle = (array: any[]) => {
             let output = JSON.parse(JSON.stringify(array));
-            let currentIndex = output.length,  randomIndex;
+            let currentIndex = output.length, randomIndex;
 
             // While there remain elements to shuffle.
             while (currentIndex !== 0) {
@@ -117,7 +118,13 @@ function App() {
                             </div>
                         </form>
 
-                        <HuePicker className={'w-80'}/>
+                        <HuePicker
+                            className={'w-80'}
+                            color={colorHuePicker}
+                            onChange={(colorResult) => {
+                                setColorHuePicker(colorResult.hex);
+                            }}
+                        />
                     </div>
                     <div className={'flex flex-col justify-center'}>
                         <Tooltip
@@ -143,13 +150,11 @@ function App() {
                 </div>
 
 
-
-
                 <div className={'flex flex-wrap justify-center gap-4 mt-2 p-2'}>
                     {
                         colors.map((color, index) => {
                             return (
-                                <React.Fragment key={'colort_'+index}>
+                                <React.Fragment key={'colort_' + index}>
                                     <CardComponent
                                         name={color.name}
                                         hex={color.hex}
