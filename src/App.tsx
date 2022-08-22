@@ -1,10 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import axios from "axios";
 import 'react-notifications-component/dist/theme.css';
 import {ReactNotifications, Store} from 'react-notifications-component';
 import 'flowbite-react';
 import {Tooltip} from 'flowbite-react';
-import {HuePicker} from 'react-color';
+import {ColorResult, HuePicker} from 'react-color';
+import {ColorMatch, nearestFrom} from 'nearest-colors';
+import namedColors from 'color-name-list';
 
 
 interface ColorModel {
@@ -95,13 +97,28 @@ function App() {
         setColors(shuffle(colors));
     }
 
+    const onChangeHuePicker = (colorResult: ColorResult) => {
+        const nearestColors = nearestFrom(namedColors,'name', 'hex');
+        const colorMatch = nearestColors(colorResult.hex, 100) as ColorMatch[];
+        const colors = colorMatch.map((color)=>{return color.value.substring(1)});
+
+        axios
+            .get('https://api.color.pizza/v1/' + colors.join())
+            .then((response) => {
+                setColors(
+                    response.data.colors
+                );
+            })
+        ;
+    }
+
     return (
         <div className="App">
             <ReactNotifications/>
             <div className={'container mx-auto p-4 mt-4'}>
                 <div className={'flex flex-row justify-center gap-4'}>
                     <div className={'flex flex-col justify-center gap-2'}>
-                        <form className="max-w-md w-80">
+                        <form className="w-64">
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-full">
                                 <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
@@ -119,11 +136,13 @@ function App() {
                         </form>
 
                         <HuePicker
-                            className={'w-80'}
+                            width={'255px'}
+                            className={'w-60'}
                             color={colorHuePicker}
                             onChange={(colorResult) => {
                                 setColorHuePicker(colorResult.hex);
                             }}
+                            onChangeComplete={onChangeHuePicker}
                         />
                     </div>
                     <div className={'flex flex-col justify-center'}>
