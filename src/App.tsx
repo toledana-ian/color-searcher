@@ -7,24 +7,22 @@ import {Tooltip} from 'flowbite-react';
 import {ColorResult, HuePicker} from 'react-color';
 import {ColorMatch, nearestFrom} from 'nearest-colors';
 import namedColors from 'color-name-list';
+import tinycolor from 'tinycolor2';
 
 
 interface ColorModel {
     name: string,
-    hex: string,
-    luminance: number
+    hex: string
 }
 
 const CardComponent = (props: ColorModel) => {
-    const textColor = props.luminance < 65 ? 'white' : 'black';
-
     return (
         <>
             <div
                 className="flex flex-col justify-center p-6 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
                 style={{
                     background: props.hex,
-                    color: textColor
+                    color: tinycolor(props.hex).isLight() ? 'black' : 'white'
                 }}
                 onClick={() => {
                     navigator.clipboard.writeText(props.name + '\t' + props.hex);
@@ -64,14 +62,7 @@ function App() {
         const searchValue = event.currentTarget.value;
         if (searchValue.length < 3) return;
 
-        axios
-            .get('https://api.color.pizza/v1/names/' + searchValue)
-            .then((response) => {
-                setColors(
-                    response.data.colors
-                );
-            })
-        ;
+        setColors(namedColors.filter(color => color.name.toLowerCase().includes(searchValue.toLowerCase())));
     }
 
     const onClickShuffle = (_: React.FormEvent<HTMLButtonElement>) => {
@@ -98,18 +89,14 @@ function App() {
     }
 
     const onChangeHuePicker = (colorResult: ColorResult) => {
-        const nearestColors = nearestFrom(namedColors,'name', 'hex');
+        const nearestColors = nearestFrom(namedColors, 'name', 'hex');
         const colorMatch = nearestColors(colorResult.hex, 100) as ColorMatch[];
-        const colors = colorMatch.map((color)=>{return color.value.substring(1)});
 
-        axios
-            .get('https://api.color.pizza/v1/' + colors.join())
-            .then((response) => {
-                setColors(
-                    response.data.colors
-                );
+        setColors(
+            colorMatch.map((color) => {
+                return {name: color.name, hex: color.value}
             })
-        ;
+        );
     }
 
     return (
@@ -177,7 +164,6 @@ function App() {
                                     <CardComponent
                                         name={color.name}
                                         hex={color.hex}
-                                        luminance={color.luminance}
                                     />
                                 </React.Fragment>
                             );
