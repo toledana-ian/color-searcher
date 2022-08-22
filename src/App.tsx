@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import axios from "axios";
 import 'react-notifications-component/dist/theme.css';
 import {ReactNotifications, Store} from 'react-notifications-component';
 import 'flowbite-react';
