@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import 'react-notifications-component/dist/theme.css';
 import {ReactNotifications, Store} from 'react-notifications-component';
 import 'flowbite-react';
-import {Checkbox, Tooltip} from 'flowbite-react';
 import {ColorResult, HuePicker} from 'react-color';
 import {ColorMatch, nearestFrom} from 'nearest-colors';
 import namedColors from 'color-name-list';
