@@ -56,8 +56,8 @@ function App() {
     const [colors, setColors] = useState<ColorModel[]>([]);
     const [toggleSearchType, setToggleSearchType] = useState(false);
     const [colorPickerSelectedColor, setColorPickerSelectedColor] = useState('#fff');
-    const [inputSearchRelevanceColor, setInputSearchRelevanceColor] = useState('');
-    const [inputSearchColorName, setInputSearchColorName] = useState('');
+    const [inputSearchRelevanceColor, setInputSearchRelevanceColor] = useState('fff');
+    const [inputSearchColorName, setInputSearchColorName] = useState('white');
 
     const searchColorRelevance = (hex: string) => {
         const nearestColors = nearestFrom(namedColors, 'name', 'hex');
