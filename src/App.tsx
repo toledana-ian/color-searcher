@@ -2,10 +2,10 @@ import React, {useEffect, useState} from 'react';
 import 'react-notifications-component/dist/theme.css';
 import {ReactNotifications, Store} from 'react-notifications-component';
 import 'flowbite-react';
-import {ColorResult, HuePicker} from 'react-color';
 import {ColorMatch, nearestFrom} from 'nearest-colors';
 import namedColors from 'color-name-list';
 import tinycolor from 'tinycolor2';
+import { HexColorPicker } from "react-colorful";
 
 
 interface ColorModel {
@@ -54,8 +54,8 @@ const CardComponent = (props: ColorModel) => {
 
 function App() {
     const [colors, setColors] = useState<ColorModel[]>([]);
-    const [colorHuePicker, setColorHuePicker] = useState('#fff');
     const [toggleSearchType, setToggleSearchType] = useState(false);
+    const [colorPickerSelectedColor, setColorPickerSelectedColor] = useState('#fff');
     const [inputSearchRelevanceColor, setInputSearchRelevanceColor] = useState('');
 
     const searchColorRelevance = (hex: string) => {
@@ -99,19 +99,12 @@ function App() {
         setColors(shuffle(colors));
     }
 
-    const onChangeHuePicker = (colorResult: ColorResult) => {
-        setInputSearchRelevanceColor(colorResult.hex.substring(1))
-    }
-
     useEffect(()=>{
-        const color = tinycolor(inputSearchRelevanceColor);
+        setInputSearchRelevanceColor(colorPickerSelectedColor.substring(1));
+        searchColorRelevance(colorPickerSelectedColor);
+    }, [colorPickerSelectedColor]);
 
-        if(color.isValid()){
-            setColorHuePicker('#'+color.toHex());
-            searchColorRelevance('#'+color.toHex());
-        }
 
-    }, [inputSearchRelevanceColor]);
 
     return (
         <div className="App">
@@ -121,22 +114,25 @@ function App() {
                     <div className={'flex flex-col justify-center'}>
 
                         <div className={'flex gap-2 justify-center'}>
-                            <div className={(!toggleSearchType?'font-bold':'')}>Name Search</div>
-                            <div className="inline-flex relative items-center mb-4 cursor-pointer" onClick={()=>{setToggleSearchType(!toggleSearchType)}}>
+                            <div className={(!toggleSearchType ? 'font-bold' : '')}>Name Search</div>
+                            <div className="inline-flex relative items-center mb-4 cursor-pointer" onClick={() => {
+                                setToggleSearchType(!toggleSearchType)
+                            }}>
                                 <input
                                     type={'checkbox'}
                                     className="sr-only peer"
                                     checked={toggleSearchType}
-                                    onChange={()=>{}}
+                                    onChange={() => {
+                                    }}
                                 />
                                 <div
                                     className="bg-blue-600 w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
                                 />
                             </div>
-                            <div className={(toggleSearchType?'font-bold':'')}>Relevance Search</div>
+                            <div className={(toggleSearchType ? 'font-bold' : '')}>Relevance Search</div>
                         </div>
 
-                        <div className={'w-full '+(toggleSearchType?'hidden':'')}>
+                        <div className={'w-full ' + (toggleSearchType ? 'hidden' : '')}>
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-full">
                                 <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
@@ -153,14 +149,16 @@ function App() {
                             </div>
                         </div>
 
-                        <div className={'flex flex-col gap-2 '+(!toggleSearchType?'hidden':'')}>
-                            <HuePicker
-                                color={colorHuePicker}
-                                onChange={(colorResult) => {
-                                    setColorHuePicker(colorResult.hex);
-                                }}
-                                onChangeComplete={onChangeHuePicker}
-                            />
+                        <div className={'flex flex-col gap-5 ' + (!toggleSearchType ? 'hidden' : '')}>
+                            <div className={'mx-auto'}>
+                                <HexColorPicker
+                                    color={colorPickerSelectedColor}
+                                    onChange={(newColor)=>{
+                                        setColorPickerSelectedColor(newColor);
+                                    }}
+                                />
+                            </div>
+
 
                             <div className={'flex justify-center'}>
                                     <span
@@ -172,8 +170,13 @@ function App() {
                                     className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="000000"
                                     value={inputSearchRelevanceColor}
-                                    onChange={(event)=>{
-                                        setInputSearchRelevanceColor(event.currentTarget.value)
+                                    onChange={(event) => {
+                                        setInputSearchRelevanceColor(event.currentTarget.value);
+
+                                        const tinyColor = tinycolor(event.currentTarget.value);
+                                        if(tinyColor.isValid()){
+                                            setColorPickerSelectedColor('#'+tinyColor.toHex());
+                                        }
                                     }}
                                 />
                             </div>
