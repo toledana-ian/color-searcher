@@ -5,7 +5,7 @@ import 'flowbite-react';
 import {ColorMatch, nearestFrom} from 'nearest-colors';
 import namedColors from 'color-name-list';
 import tinycolor from 'tinycolor2';
-import { HexColorPicker } from "react-colorful";
+import {HexColorPicker} from "react-colorful";
 
 
 interface ColorModel {
@@ -57,6 +57,7 @@ function App() {
     const [toggleSearchType, setToggleSearchType] = useState(false);
     const [colorPickerSelectedColor, setColorPickerSelectedColor] = useState('#fff');
     const [inputSearchRelevanceColor, setInputSearchRelevanceColor] = useState('');
+    const [inputSearchColorName, setInputSearchColorName] = useState('');
 
     const searchColorRelevance = (hex: string) => {
         const nearestColors = nearestFrom(namedColors, 'name', 'hex');
@@ -69,11 +70,14 @@ function App() {
         );
     }
 
-    const onChangeSearch = (event: React.FormEvent<HTMLInputElement>) => {
-        const searchValue = event.currentTarget.value;
-        if (searchValue.length < 3) return;
+    const onChangeInputSearchRelevanceColor = (event: React.FormEvent<HTMLInputElement>) => {
+        const value = event.currentTarget.value;
+        setInputSearchRelevanceColor(value);
 
-        setColors(namedColors.filter(color => color.name.toLowerCase().includes(searchValue.toLowerCase())));
+        const tinyColor = tinycolor(value);
+        if (tinyColor.isValid()) {
+            setColorPickerSelectedColor('#' + tinyColor.toHex());
+        }
     }
 
     const onClickShuffle = (_: React.FormEvent<HTMLButtonElement>) => {
@@ -99,12 +103,19 @@ function App() {
         setColors(shuffle(colors));
     }
 
+    useEffect(() => {
+        if (toggleSearchType) {
+            setInputSearchRelevanceColor(colorPickerSelectedColor.substring(1));
+            searchColorRelevance(colorPickerSelectedColor);
+        }
+    }, [colorPickerSelectedColor, toggleSearchType]);
+
     useEffect(()=>{
-        setInputSearchRelevanceColor(colorPickerSelectedColor.substring(1));
-        searchColorRelevance(colorPickerSelectedColor);
-    }, [colorPickerSelectedColor]);
-
-
+        if(!toggleSearchType){
+            if (inputSearchColorName.length < 3) return;
+            setColors(namedColors.filter(color => color.name.toLowerCase().includes(inputSearchColorName.toLowerCase())));
+        }
+    }, [inputSearchColorName, toggleSearchType]);
 
     return (
         <div className="App">
@@ -143,9 +154,13 @@ function App() {
                                               clipRule="evenodd"/>
                                     </svg>
                                 </div>
-                                <input type="text"
-                                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                       placeholder="Search" onChange={onChangeSearch} required/>
+                                <input
+                                    type="text"
+                                    value={inputSearchColorName}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Search"
+                                    onChange={event=>setInputSearchColorName(event.currentTarget.value)}
+                                />
                             </div>
                         </div>
 
@@ -153,7 +168,7 @@ function App() {
                             <div className={'mx-auto'}>
                                 <HexColorPicker
                                     color={colorPickerSelectedColor}
-                                    onChange={(newColor)=>{
+                                    onChange={(newColor) => {
                                         setColorPickerSelectedColor(newColor);
                                     }}
                                 />
@@ -170,14 +185,7 @@ function App() {
                                     className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="000000"
                                     value={inputSearchRelevanceColor}
-                                    onChange={(event) => {
-                                        setInputSearchRelevanceColor(event.currentTarget.value);
-
-                                        const tinyColor = tinycolor(event.currentTarget.value);
-                                        if(tinyColor.isValid()){
-                                            setColorPickerSelectedColor('#'+tinyColor.toHex());
-                                        }
-                                    }}
+                                    onChange={onChangeInputSearchRelevanceColor}
                                 />
                             </div>
                         </div>
