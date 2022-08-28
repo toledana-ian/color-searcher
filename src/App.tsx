@@ -13,47 +13,11 @@ interface ColorModel {
     hex: string
 }
 
-const CardComponent = (props: ColorModel) => {
-    return (
-        <>
-            <div
-                className="flex flex-col justify-center p-6 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
-                style={{
-                    background: props.hex,
-                    color: tinycolor(props.hex).isLight() ? 'black' : 'white'
-                }}
-                onClick={() => {
-                    navigator.clipboard.writeText(props.name + '\t' + props.hex);
-                    Store.removeAllNotifications();
-                    Store.addNotification({
-                        title: "Success!",
-                        message: 'Copied ' + props.name + ' to clipboard',
-                        type: "success",
-                        insert: "top",
-                        container: "top-right",
-                        animationIn: ["animate__animated", "animate__fadeIn"],
-                        animationOut: ["animate__animated", "animate__fadeOut"],
-                        dismiss: {
-                            duration: 5000,
-                            onScreen: true,
-                            showIcon: true
-                        }
-                    });
-                }}
-            >
-                <div className={'font-bold text-center cursor-pointer'}>
-                    {props.name}
-                </div>
-                <div className={'font-bold text-center cursor-pointer'}>
-                    {props.hex}
-                </div>
-            </div>
-        </>
-    );
-}
-
 function App() {
-    const [colors, setColors] = useState<ColorModel[]>([]);
+    const [foundColors, setFoundColors] = useState<ColorModel[]>([]);
+    const [displayColors, setDisplayColors] = useState<ColorModel[]>([]);
+    const [pinnedColors, setPinnedColors] = useState<ColorModel[]>([]);
+
     const [toggleSearchType, setToggleSearchType] = useState(false);
     const [colorPickerSelectedColor, setColorPickerSelectedColor] = useState('#fff');
     const [inputSearchRelevanceColor, setInputSearchRelevanceColor] = useState('fff');
@@ -63,7 +27,7 @@ function App() {
         const nearestColors = nearestFrom(namedColors, 'name', 'hex');
         const colorMatch = nearestColors(hex, 100) as ColorMatch[];
 
-        setColors(
+        setFoundColors(
             colorMatch.map((color) => {
                 return {name: color.name, hex: color.value}
             })
@@ -100,8 +64,46 @@ function App() {
             return output;
         }
 
-        setColors(shuffle(colors));
+        setFoundColors(shuffle(foundColors));
     }
+
+    const onClickToClipBoard = (props: ColorModel) => {
+        navigator.clipboard.writeText(props.name + '\t' + props.hex);
+        Store.removeAllNotifications();
+        Store.addNotification({
+            title: "Success!",
+            message: 'Copied ' + props.name + ' to clipboard',
+            type: "success",
+            insert: "top",
+            container: "top-right",
+            animationIn: ["animate__animated", "animate__fadeIn"],
+            animationOut: ["animate__animated", "animate__fadeOut"],
+            dismiss: {
+                duration: 5000,
+                onScreen: true,
+                showIcon: true
+            }
+        });
+    }
+
+    const onClickAddToPinnedColors = (color: ColorModel) => {
+        const newPinnedColors = [...pinnedColors, color];
+
+        setPinnedColors(newPinnedColors);
+        localStorage['pinnedColors'] = JSON.stringify(newPinnedColors);
+    }
+
+    const onClickRemoveToPinnedColors = (color: ColorModel) => {
+        const newPinnedColors = pinnedColors.filter(pinnedColor=>pinnedColor!==color);
+
+        setPinnedColors(newPinnedColors);
+        localStorage['pinnedColors'] = JSON.stringify(newPinnedColors);
+    }
+
+    useEffect(()=>{
+        if(localStorage['pinnedColors']!==undefined)
+            setPinnedColors(JSON.parse(localStorage['pinnedColors']))
+    }, [])
 
     useEffect(() => {
         if (toggleSearchType) {
@@ -113,14 +115,18 @@ function App() {
     useEffect(()=>{
         if(!toggleSearchType){
             if (inputSearchColorName.length < 3) return;
-            setColors(namedColors.filter(color => color.name.toLowerCase().includes(inputSearchColorName.toLowerCase())));
+            setFoundColors(namedColors.filter(color => color.name.toLowerCase().includes(inputSearchColorName.toLowerCase())));
         }
     }, [inputSearchColorName, toggleSearchType]);
+
+    useEffect(()=>{
+        setDisplayColors(foundColors.filter(color=>!JSON.stringify(pinnedColors).includes(JSON.stringify(color))));
+    }, [foundColors, pinnedColors])
 
     return (
         <div className="App">
             <ReactNotifications/>
-            <div className={'container mx-auto p-4 mt-4'}>
+            <div className={'container mx-auto p-4 mt-4 flex flex-col gap-4'}>
                 <div className={'flex flex-row justify-center gap-4'}>
                     <div className={'flex flex-col justify-center'}>
 
@@ -213,16 +219,70 @@ function App() {
                     </div>
                 </div>
 
-
-                <div className={'flex flex-wrap justify-center gap-4 mt-2 p-2'}>
+                <div className={'flex flex-wrap justify-center gap-4 p-2'}>
                     {
-                        colors.map((color, index) => {
+                        pinnedColors.map((color, index) => {
                             return (
-                                <React.Fragment key={'colort_' + index}>
-                                    <CardComponent
-                                        name={color.name}
-                                        hex={color.hex}
-                                    />
+                                <React.Fragment key={'color_' + index}>
+                                    <div
+                                        className="flex flex-col gap-2 justify-center px-6 py-4 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
+                                        style={{
+                                            background: color.hex,
+                                            color: tinycolor(color.hex).isLight() ? 'black' : 'white'
+                                        }}
+                                    >
+                                        <div className={'flex justify-center text-blue-500'} onClick={()=>onClickRemoveToPinnedColors(color)}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor" className="bi bi-pin-fill" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/>
+                                            </svg>
+                                        </div>
+                                        <div className={'hover:underline'} onClick={() => onClickToClipBoard(color)}>
+                                            <div className={'font-bold text-center cursor-pointer'}>
+                                                {color.name}
+                                            </div>
+                                            <div className={'font-bold text-center cursor-pointer'}>
+                                                {color.hex}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </React.Fragment>
+                            );
+                        })
+                    }
+                </div>
+
+                <div className={'flex flex-wrap justify-center gap-4 p-2 mt-2'}>
+                    {
+                        displayColors.map((color, index) => {
+                            return (
+                                <React.Fragment key={'color_' + index}>
+                                    <div
+                                        className="flex flex-col gap-2 justify-center px-6 py-4 w-60 h-30 rounded-lg border border-black shadow-black shadow-sm"
+                                        style={{
+                                            background: color.hex,
+                                            color: tinycolor(color.hex).isLight() ? 'black' : 'white'
+                                        }}
+                                    >
+                                        <div className={'flex justify-center hover:text-blue-500'} onClick={()=>onClickAddToPinnedColors(color)}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pin"
+                                                 viewBox="0 0 16 16">
+                                                <path
+                                                    d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354zm1.58 1.408-.002-.001.002.001zm-.002-.001.002.001A.5.5 0 0 1 6 2v5a.5.5 0 0 1-.276.447h-.002l-.012.007-.054.03a4.922 4.922 0 0 0-.827.58c-.318.278-.585.596-.725.936h7.792c-.14-.34-.407-.658-.725-.936a4.915 4.915 0 0 0-.881-.61l-.012-.006h-.002A.5.5 0 0 1 10 7V2a.5.5 0 0 1 .295-.458 1.775 1.775 0 0 0 .351-.271c.08-.08.155-.17.214-.271H5.14c.06.1.133.191.214.271a1.78 1.78 0 0 0 .37.282z"/>
+                                            </svg>
+                                        </div>
+                                        <div className={'hover:underline'} onClick={() => onClickToClipBoard(color)}>
+                                            <div className={'font-bold text-center cursor-pointer'}>
+                                                {color.name}
+                                            </div>
+                                            <div className={'font-bold text-center cursor-pointer'}>
+                                                {color.hex}
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </React.Fragment>
                             );
                         })
