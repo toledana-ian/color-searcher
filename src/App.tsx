@@ -6,6 +6,7 @@ import {ColorMatch, nearestFrom} from 'nearest-colors';
 import namedColors from 'color-name-list';
 import tinycolor from 'tinycolor2';
 import {HexColorPicker} from "react-colorful";
+import {Tooltip} from "flowbite-react";
 
 
 interface ColorModel {
@@ -94,14 +95,14 @@ function App() {
     }
 
     const onClickRemoveToPinnedColors = (color: ColorModel) => {
-        const newPinnedColors = pinnedColors.filter(pinnedColor=>pinnedColor!==color);
+        const newPinnedColors = pinnedColors.filter(pinnedColor => pinnedColor !== color);
 
         setPinnedColors(newPinnedColors);
         localStorage['pinnedColors'] = JSON.stringify(newPinnedColors);
     }
 
-    useEffect(()=>{
-        if(localStorage['pinnedColors']!==undefined)
+    useEffect(() => {
+        if (localStorage['pinnedColors'] !== undefined)
             setPinnedColors(JSON.parse(localStorage['pinnedColors']))
     }, [])
 
@@ -112,22 +113,22 @@ function App() {
         }
     }, [colorPickerSelectedColor, toggleSearchType]);
 
-    useEffect(()=>{
-        if(!toggleSearchType){
+    useEffect(() => {
+        if (!toggleSearchType) {
             if (inputSearchColorName.length < 3) return;
             setFoundColors(namedColors.filter(color => color.name.toLowerCase().includes(inputSearchColorName.toLowerCase())));
         }
     }, [inputSearchColorName, toggleSearchType]);
 
-    useEffect(()=>{
-        setDisplayColors(foundColors.filter(color=>!JSON.stringify(pinnedColors).includes(JSON.stringify(color))));
+    useEffect(() => {
+        setDisplayColors(foundColors.filter(color => !JSON.stringify(pinnedColors).includes(JSON.stringify(color))));
     }, [foundColors, pinnedColors])
 
     return (
         <div className="App">
             <ReactNotifications/>
             <div className={'container mx-auto p-4 mt-4 flex flex-col gap-4'}>
-                <div className={'flex flex-row justify-center gap-4'}>
+                <div className={'flex flex-row justify-center gap-4 mb-2'}>
                     <div className={'flex flex-col justify-center'}>
 
                         <div className={'flex gap-2 justify-center'}>
@@ -165,7 +166,7 @@ function App() {
                                     value={inputSearchColorName}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Search"
-                                    onChange={event=>setInputSearchColorName(event.currentTarget.value)}
+                                    onChange={event => setInputSearchColorName(event.currentTarget.value)}
                                 />
                             </div>
                         </div>
@@ -219,7 +220,16 @@ function App() {
                     </div>
                 </div>
 
+                <hr className={'border-gray-500'}/>
+
                 <div className={'flex flex-wrap justify-center gap-4 p-2'}>
+                    {
+                        pinnedColors.length === 0 ?
+                            <>
+                                <div className={'text-gray-700 font-bold'}>0 Pinned Colors</div>
+                            </> : ''
+                    }
+
                     {
                         pinnedColors.map((color, index) => {
                             return (
@@ -231,12 +241,18 @@ function App() {
                                             color: tinycolor(color.hex).isLight() ? 'black' : 'white'
                                         }}
                                     >
-                                        <div className={'flex justify-center text-blue-500'} onClick={()=>onClickRemoveToPinnedColors(color)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                 fill="currentColor" className="bi bi-pin-fill" viewBox="0 0 16 16">
-                                                <path
-                                                    d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/>
-                                            </svg>
+                                        <div className={'flex justify-center'}
+                                             onClick={() => onClickRemoveToPinnedColors(color)}>
+                                            <Tooltip
+                                                content={'Unpin ' + color.hex}
+                                                placement="top"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                     fill="currentColor" className="bi bi-pin-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/>
+                                                </svg>
+                                            </Tooltip>
                                         </div>
                                         <div className={'hover:underline'} onClick={() => onClickToClipBoard(color)}>
                                             <div className={'font-bold text-center cursor-pointer'}>
@@ -254,6 +270,8 @@ function App() {
                     }
                 </div>
 
+                <hr className={'border-gray-500'}/>
+
                 <div className={'flex flex-wrap justify-center gap-4 p-2 mt-2'}>
                     {
                         displayColors.map((color, index) => {
@@ -266,12 +284,19 @@ function App() {
                                             color: tinycolor(color.hex).isLight() ? 'black' : 'white'
                                         }}
                                     >
-                                        <div className={'flex justify-center hover:text-blue-500'} onClick={()=>onClickAddToPinnedColors(color)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pin"
-                                                 viewBox="0 0 16 16">
-                                                <path
-                                                    d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354zm1.58 1.408-.002-.001.002.001zm-.002-.001.002.001A.5.5 0 0 1 6 2v5a.5.5 0 0 1-.276.447h-.002l-.012.007-.054.03a4.922 4.922 0 0 0-.827.58c-.318.278-.585.596-.725.936h7.792c-.14-.34-.407-.658-.725-.936a4.915 4.915 0 0 0-.881-.61l-.012-.006h-.002A.5.5 0 0 1 10 7V2a.5.5 0 0 1 .295-.458 1.775 1.775 0 0 0 .351-.271c.08-.08.155-.17.214-.271H5.14c.06.1.133.191.214.271a1.78 1.78 0 0 0 .37.282z"/>
-                                            </svg>
+                                        <div className={'flex justify-center'}
+                                             onClick={() => onClickAddToPinnedColors(color)}>
+                                            <Tooltip
+                                                content={'Pin ' + color.hex}
+                                                placement="top"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                     fill="currentColor" className="bi bi-pin"
+                                                     viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354zm1.58 1.408-.002-.001.002.001zm-.002-.001.002.001A.5.5 0 0 1 6 2v5a.5.5 0 0 1-.276.447h-.002l-.012.007-.054.03a4.922 4.922 0 0 0-.827.58c-.318.278-.585.596-.725.936h7.792c-.14-.34-.407-.658-.725-.936a4.915 4.915 0 0 0-.881-.61l-.012-.006h-.002A.5.5 0 0 1 10 7V2a.5.5 0 0 1 .295-.458 1.775 1.775 0 0 0 .351-.271c.08-.08.155-.17.214-.271H5.14c.06.1.133.191.214.271a1.78 1.78 0 0 0 .37.282z"/>
+                                                </svg>
+                                            </Tooltip>
                                         </div>
                                         <div className={'hover:underline'} onClick={() => onClickToClipBoard(color)}>
                                             <div className={'font-bold text-center cursor-pointer'}>
